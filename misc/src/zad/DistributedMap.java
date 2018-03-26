@@ -1,9 +1,6 @@
 package zad;
 
-import org.jgroups.JChannel;
-import org.jgroups.Message;
-import org.jgroups.ReceiverAdapter;
-import org.jgroups.View;
+import org.jgroups.*;
 import org.jgroups.protocols.*;
 import org.jgroups.protocols.pbcast.*;
 import org.jgroups.stack.ProtocolStack;
@@ -15,6 +12,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DistributedMap implements SimpleStringMap {
@@ -65,6 +63,7 @@ public class DistributedMap implements SimpleStringMap {
             @Override
             public void viewAccepted(View view) {
                 System.out.println(view.toString());
+                handleView(channel, view);
             }
 
             @Override
@@ -91,8 +90,6 @@ public class DistributedMap implements SimpleStringMap {
                     distributedHashMap.clear();
                     distributedHashMap.putAll(hashmap);
                 }
-                System.out.println(distributedHashMap.size());
-                System.out.println(distributedHashMap);
             }
         });
 
@@ -116,21 +113,67 @@ public class DistributedMap implements SimpleStringMap {
     @Override
     public String put(String key, String value) {
         String result = distributedHashMap.put(key, value);
+        sendState();
+        return result;
+    }
+
+    @Override
+    public String remove(String key) {
+        String result = distributedHashMap.remove(key);
+        sendState();
+        return result;
+    }
+
+    public HashMap<String, String> getDistributedHashMap() {
+        return distributedHashMap;
+    }
+
+    public JChannel getChannel() {
+        return channel;
+    }
+
+    private void sendState() {
         Message msg = new Message(null, null, this.distributedHashMap);
         try {
             channel.send(msg);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return result;
     }
 
-    @Override
-    public String remove(String key) {
-        return distributedHashMap.remove(key);
+    private static void handleView(JChannel channel, View newView) {
+        if(newView instanceof MergeView) {
+            ViewHandler handler = new ViewHandler(channel, (MergeView) newView);
+            // requires separate thread as we don't want to block JGroups
+            handler.start();
+        }
     }
 
-    public HashMap<String, String> getDistributedHashMap() {
-        return distributedHashMap;
+    private static class ViewHandler extends Thread {
+        JChannel channel;
+        MergeView view;
+
+        private ViewHandler(JChannel channel, MergeView view) {
+            this.channel = channel;
+            this.view = view;
+        }
+
+        public void run() {
+            List<View> subgroups = view.getSubgroups();
+            View tmpView = subgroups.get(0); // picks the first
+            Address localAddr = channel.getAddress();
+            if(!tmpView.getMembers().contains(localAddr)) {
+                System.out.println("Merge to primary channel ("
+                        + tmpView + ")");
+                try {
+                    channel.getState(null, 30000);
+                }
+                catch(Exception ex) {
+                }
+            }
+            else {
+                System.out.println("I am primary (" + tmpView + ")");
+            }
+        }
     }
 }
