@@ -52,8 +52,8 @@ public class DistributedMap implements SimpleStringMap {
                     .addProtocol(new UFC())
                     .addProtocol(new MFC())
                     .addProtocol(new FRAG2())
-                    .addProtocol(new SEQUENCER())
-                    .addProtocol(new FLUSH())
+//                    .addProtocol(new SEQUENCER())
+//                    .addProtocol(new FLUSH())
                     .addProtocol(new STATE_TRANSFER());
 
             stack.init();
@@ -74,6 +74,7 @@ public class DistributedMap implements SimpleStringMap {
                     distributedHashMap.clear();
                     distributedHashMap.putAll(hashmap);
                 }
+                System.out.println(hashmap);
             }
 
             @Override
@@ -91,7 +92,7 @@ public class DistributedMap implements SimpleStringMap {
                     distributedHashMap.putAll(hashmap);
                 }
                 System.out.println(distributedHashMap.size());
-                System.out.println(distributedHashMap.toString());
+                System.out.println(distributedHashMap);
             }
         });
 
@@ -127,5 +128,9 @@ public class DistributedMap implements SimpleStringMap {
     @Override
     public String remove(String key) {
         return distributedHashMap.remove(key);
+    }
+
+    public HashMap<String, String> getDistributedHashMap() {
+        return distributedHashMap;
     }
 }
