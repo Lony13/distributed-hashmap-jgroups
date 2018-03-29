@@ -11,16 +11,14 @@ public class Main {
         DistributedMap distributedMap = new DistributedMap();
         boolean flag = true;
 
+        showInfo();
+
         while (flag){
             List<String> command = Arrays.asList(scanner.nextLine().split(" "));
-            System.out.println("-----------------------------");
-            System.out.println("[put] [key] [value]");
-            System.out.println("[get|remove|contains] [key]");
-            System.out.println("[show|members]");
-            System.out.println("-----------------------------");
+            showInfo();
             switch (command.get(0)){
                 case "put":
-                    System.out.println(distributedMap.put(command.get(1), command.get(2)));
+                    distributedMap.put(command.get(1), command.get(2));
                     break;
                 case "remove":
                     System.out.println(distributedMap.remove(command.get(1)));
@@ -43,5 +41,14 @@ public class Main {
                     break;
             }
         }
+    }
+
+    private static void showInfo(){
+        System.out.println("-----------------------------");
+        System.out.println("[put] [key] [value]");
+        System.out.println("[get|remove|contains] [key]");
+        System.out.println("[show|members]");
+        System.out.println("-----------------------------");
+
     }
 }
