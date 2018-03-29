@@ -11,15 +11,13 @@ public class Main {
         DistributedMap distributedMap = new DistributedMap();
         boolean flag = true;
 
-        distributedMap.put("Lony", "Discord");
-        distributedMap.put("Ola", "Marcin");
-        distributedMap.put("CDProject", "Marcin");
         while (flag){
             List<String> command = Arrays.asList(scanner.nextLine().split(" "));
             System.out.println("-----------------------------");
             System.out.println("[put] [key] [value]");
             System.out.println("[get|remove|contains] [key]");
             System.out.println("[show|members]");
+            System.out.println("-----------------------------");
             switch (command.get(0)){
                 case "put":
                     System.out.println(distributedMap.put(command.get(1), command.get(2)));

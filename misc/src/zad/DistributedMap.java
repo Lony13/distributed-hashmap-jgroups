@@ -73,7 +73,6 @@ public class DistributedMap implements SimpleStringMap {
                     distributedHashMap.clear();
                     distributedHashMap.putAll(hashmap);
                 }
-                System.out.println(hashmap);
             }
 
             @Override
@@ -94,7 +93,7 @@ public class DistributedMap implements SimpleStringMap {
         });
 
         try {
-            channel.connect("hashmap");
+            channel.connect("cluster");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -163,10 +162,9 @@ public class DistributedMap implements SimpleStringMap {
             View tmpView = subgroups.get(0); // picks the first
             Address localAddr = channel.getAddress();
             if(!tmpView.getMembers().contains(localAddr)) {
-                System.out.println("Merge to primary channel ("
-                        + tmpView + ")");
+                System.out.println("Merge to primary channel (" + tmpView + ")");
                 try {
-                    channel.getState(null, 30000);
+                    channel.getState(tmpView.getCoord(), 30000);
                 }
                 catch(Exception ex) {
                 }
